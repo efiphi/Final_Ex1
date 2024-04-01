@@ -11,7 +11,6 @@ public class Flight extends AirlineComponent implements FlightSubject {
     private LocalDateTime takeoffTime;
     private LocalDateTime landingTime;
     private List<FlightObserver> observers = new ArrayList<>();
-    private int expectedDirectFlightDuration; // in minutes
 
     public Flight(String flightNumber, double price, int duration, LocalDateTime takeoffTime, LocalDateTime landingTime, boolean isDirect) {
         this.flightNumber = flightNumber;
