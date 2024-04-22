@@ -25,6 +25,14 @@ class SearchByDuration implements SearchStrategy {
                 .collect(Collectors.toList());
     }
 }
+class SearchByTakeoffTime implements SearchStrategy {
+    @Override
+    public List<Flight> search(List<Flight> flights) {
+        return flights.stream()
+                .sorted(Comparator.comparing(Flight::getTakeoffTime))
+                .collect(Collectors.toList());
+    }
+}
 
 class SearchForDirectFlight implements SearchStrategy {
     @Override
@@ -35,16 +43,6 @@ class SearchForDirectFlight implements SearchStrategy {
     }
 }
 
-class SearchForBestFlight implements SearchStrategy {
-    @Override
-    public List<Flight> search(List<Flight> flights) {
-        // Example criteria: lower price and shorter duration
-        return flights.stream()
-                .sorted(Comparator.comparingDouble(Flight::getPrice)
-                        .thenComparingInt(Flight::getDuration))
-                .collect(Collectors.toList());
-    }
-}
 
 
 // Context Class

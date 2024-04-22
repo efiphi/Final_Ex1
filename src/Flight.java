@@ -1,4 +1,5 @@
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -64,6 +65,15 @@ public class Flight extends AirlineComponent implements FlightSubject {
     public boolean isDirectFlight() {
         return this.isDirect;
 
+    }
+    @Override
+    public String toString() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        return "Flight Number: " + flightNumber +
+                ", Price: $" + String.format("%.2f", price) +
+                ", Duration: " + duration + " minutes" +
+                ", Takeoff Time: " + takeoffTime.format(formatter) +
+                ", Landing Time: " + landingTime.format(formatter);
     }
 
     @Override
