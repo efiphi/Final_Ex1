@@ -4,20 +4,52 @@ import java.util.List;
 // Observer Interface
 public interface FlightObserver {
     void update(String message);
+    String getName();
+    String getType();
 }
 
 // Concrete Observers
 class Passenger implements FlightObserver {
+    private String name;
+
+    public Passenger(String name) {
+        this.name = name;
+    }
     @Override
     public void update(String message) {
         System.out.println("Passenger notified: " + message);
     }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String getType() {
+        return "Passenger";
+    }
 }
 
 class Employee implements FlightObserver {
+    private String name;
+
+    public Employee(String name) {
+        this.name = name;
+    }
     @Override
     public void update(String message) {
         System.out.println("Employee notified: " + message);
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String getType() {
+        return "Employee";
     }
 }
 

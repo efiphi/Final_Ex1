@@ -1,5 +1,3 @@
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.List;
@@ -8,16 +6,19 @@ import java.util.ArrayList;
 
 public class Main {
     private static FlightSearchContext context = new FlightSearchContext();
+    private static List<FlightObserver> observers = new ArrayList<>();
+    private static List<String> notifications = new ArrayList<>();
 
     private static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
         List<Flight> flights = new ArrayList<>();
         List<FlightObserver> observers = new ArrayList<>();
-        flights.add(new Flight("FL100", 300.00, 180, LocalDateTime.now(), LocalDateTime.now().plusHours(3),false));
-        flights.add(new Flight("FL200", 200.00, 150, LocalDateTime.now().plusHours(1), LocalDateTime.now().plusHours(4),false));
-        flights.add(new Flight("FL300", 400.00, 90, LocalDateTime.now().plusHours(4), LocalDateTime.now().plusHours(5),true));
-        flights.add(new Flight("FL400", 250.00, 120, LocalDateTime.now().plusHours(2), LocalDateTime.now().plusHours(5),true));
+        FlightObserver currentObserver = loginOrCreateObserver(scanner);
+        flights.add(new Flight("FL100", 300.00, 180, LocalDateTime.now(), LocalDateTime.now().plusHours(3), false));
+        flights.add(new Flight("FL200", 200.00, 150, LocalDateTime.now().plusHours(1), LocalDateTime.now().plusHours(4), false));
+        flights.add(new Flight("FL300", 400.00, 90, LocalDateTime.now().plusHours(4), LocalDateTime.now().plusHours(5), true));
+        flights.add(new Flight("FL400", 250.00, 120, LocalDateTime.now().plusHours(2), LocalDateTime.now().plusHours(5), true));
         // Add more flights as needed
 
         int mainChoice;
@@ -27,11 +28,11 @@ public class Main {
             switch (mainChoice) {
                 case 1: // Strategy Search
                     int searchChoice1 = displaySearchMenu(scanner);
-                    handleSearchStrategy(searchChoice1,flights);
+                    handleSearchStrategy(searchChoice1, flights);
                     break;
                 case 2: // Flight options
-                    int searchChoice2 = displayFlightComponent(scanner);
-                    handleFlightComponent(searchChoice2 ,flights, observers);
+                    int searchChoice2 = displayFlightComponent(scanner,currentObserver);
+                    handleFlightComponent(searchChoice2, flights, observers, currentObserver);
                     break;
                 case 3: // Notifications
                     int searchChoice3 = displayNotificationsMenu(scanner);
@@ -51,8 +52,7 @@ public class Main {
     }
 
 
-
-    private static void handleSearchStrategy(int searchChoice, List<Flight> flights ) {
+    private static void handleSearchStrategy(int searchChoice, List<Flight> flights) {
 
         switch (searchChoice) {
             case 1:
@@ -77,54 +77,67 @@ public class Main {
         List<Flight> searchResults = context.executeStrategy(flights);
         displaySearchResults(searchResults);
     }
-    private static void handleFlightComponent(int searchChoice, List<Flight> flights,List<FlightObserver> observers) {
 
-        switch (searchChoice){
-            case 1:
+    private static void handleFlightComponent(int searchChoice, List<Flight> flights, List<FlightObserver> observers, FlightObserver observer) {
+        if ("Employee".equals(observer.getType())) {
+            switch (searchChoice) {
+                case 1:
+                    displayFlights(flights);
+                    break;
+                case 2:
+                    addFlight(scanner, flights);
+                    break;
+                case 3: // Cancel flight
+                    cancelFlight(scanner, flights, observers);
+                    break;
+                case 4: // Apply discount
+                    applyDiscount(scanner, flights, observers);
+                    break;
+                case 5: // Exit
+                    System.out.println("Exiting the system. Goodbye!");
+                    return;
+                default:
+                    System.out.println("Invalid option. Please try again.");
+            }
+
+
+        }else if ("Passenger".equals(observer.getType())) {
+            // Only viewing option available for Passengers
+            if (searchChoice == 1) {
+                System.out.println("View flights:");
                 displayFlights(flights);
-                break;
-            case 2:
-                addFlight(scanner, flights);
-                break;
-            case 3: // Cancel flight
-                cancelFlight(scanner, flights, observers);
-                break;
-            case 4: // Apply discount
-                applyDiscount(scanner, flights, observers);
-                break;
-            case 5: // Exit
-                System.out.println("Exiting the system. Goodbye!");
-                return;
-            default:
-                System.out.println("Invalid option. Please try again.");
-
-
+            } else {
+                System.out.println("Invalid option for passengers. Please try again.");
+            }
         }
     }
 
 
-
-    private static void handleNotificationSystem(int searchChoice, List<Flight> flights,List<FlightObserver> observers) {
+    private static void handleNotificationSystem(int searchChoice, List<Flight> flights, List<FlightObserver> observers) {
         switch (searchChoice) {
             case 1:
-                registerObserver(observers);
+                registerObserver(scanner);
                 break;
             case 2:
-                viewNotifications(observers);
+                removeObserver(scanner);
                 break;
-            case 3: // Exit
+            case 3:
+                viewNotifications();
+                break;
+            case 4: // Exit
                 System.out.println("Exiting the system. Goodbye!");
                 return;
             default:
                 System.out.println("Invalid option. Please try again.");
         }
     }
+
     private static int displayMainMenu(Scanner scanner) {
         System.out.println("\nWelcome to the Airline Management System!");
         System.out.println("Please select an option to proceed:");
         System.out.println("1. View flights sort options:");
-        System.out.println("2. Flight options:");
-        System.out.println("3. View notifications:");
+        System.out.println("2. Flight options(based on role):");
+        System.out.println("3. Observer options:");
         System.out.println("4. Exit");
         System.out.print("Enter your choice: ");
         return scanner.nextInt();
@@ -141,21 +154,29 @@ public class Main {
         System.out.print("Enter your choice: ");
         return scanner.nextInt();
     }
-    private static int displayFlightComponent(Scanner scanner) {
+
+    private static int displayFlightComponent(Scanner scanner, FlightObserver observer) {
         System.out.println("Please select an option to proceed:");
-        System.out.println("1. View flights:");
-        System.out.println("2. Add flight");
-        System.out.println("3. cancel flight");
-        System.out.println("4. apply discount");
-        System.out.println("5. Exit");
+        if ("Employee".equals(observer.getType())) {
+            System.out.println("1. View flights:");
+            System.out.println("2. Add flight");
+            System.out.println("3. cancel flight");
+            System.out.println("4. apply discount");
+            System.out.println("5. Exit");
+        }else if ("Passenger".equals(observer.getType())) {
+            System.out.println("1. View flights:");
+            System.out.println("2. Exit");
+        }
         System.out.print("Enter your choice: ");
         return scanner.nextInt();
     }
+
     private static int displayNotificationsMenu(Scanner scanner) {
         System.out.println("Please select an option to proceed:");
         System.out.println("1. Register Observer");
-        System.out.println("2. View Notifications");
-        System.out.println("3. Exit");
+        System.out.println("2. Remove Observer");
+        System.out.println("3. View Notifications");
+        System.out.println("4. Exit");
         System.out.print("Enter your choice: ");
         return scanner.nextInt();
     }
@@ -176,6 +197,7 @@ public class Main {
             }
         }
     }
+
     private static void addFlight(Scanner scanner, List<Flight> flights) {
         System.out.println("Please enter the new flight details:");
 
@@ -193,21 +215,27 @@ public class Main {
         String takeoffStr = scanner.next();
         LocalDateTime takeoffTime = LocalDateTime.parse(takeoffStr);
 
-        System.out.print("Landing Time (yyyy-MM-ddTHH:mm): ");
-        System.out.print("Example: (2024-04-22T15:30): ");
+        System.out.println("Landing Time (yyyy-MM-ddTHH:mm): ");
+        System.out.print("Example: (2024-04-22T17:30): ");
         String landingStr = scanner.next();
         LocalDateTime landingTime = LocalDateTime.parse(landingStr);
 
         System.out.print("Is direct (true/false): ");
         boolean direct = scanner.nextBoolean();
 
-
         Flight newFlight = new Flight(flightNumber, price, duration, takeoffTime, landingTime, direct);
         flights.add(newFlight);
+
+        String message = "New flight added: Flight Number " + flightNumber + ", Price: $" + price +
+                ", Duration: " + duration + " minutes, Takeoff: " + takeoffTime + ", Landing: " + landingTime +
+                ", Direct: " + direct;
+        notifyObservers(observers, message);
+        notifications.add(message);  // Storing the notification
 
         System.out.println("New flight added successfully:");
         System.out.println(newFlight);
     }
+
 
     private static void notifyObservers(List<FlightObserver> observers, String message) {
         for (FlightObserver observer : observers) {
@@ -220,9 +248,16 @@ public class Main {
         displayFlights(flights);
         System.out.println("Enter the number of the flight to cancel:");
         String flightId = scanner.next();
-        flights.removeIf(flight -> Objects.equals(flight.getFlightNumber(), flightId));
-        notifyObservers(observers, "Flight ID " + flightId + " has been canceled.");
+        boolean isRemoved = flights.removeIf(flight -> Objects.equals(flight.getFlightNumber(), flightId));
+        if (isRemoved) {
+            String message = "Flight ID " + flightId + " has been canceled.";
+            notifyObservers(observers, message);
+            notifications.add(message);  // Storing the notification
+        } else {
+            System.out.println("Flight ID not found.");
+        }
     }
+
 
     private static void applyDiscount(Scanner scanner, List<Flight> flights, List<FlightObserver> observers) {
         displayFlights(flights);
@@ -230,31 +265,49 @@ public class Main {
         String flightId = scanner.next();
         System.out.println("Enter discount percentage:");
         double discount = scanner.nextDouble();
-        for (Flight flight : flights) {
+        flights.forEach(flight -> {
             if (Objects.equals(flight.getFlightNumber(), flightId)) {
-                double newPrice = flight.getPrice() * (1 - discount / 100);
+                double oldPrice = flight.getPrice();
+                double newPrice = oldPrice * (1 - discount / 100);
                 flight.setPrice(newPrice);
-                notifyObservers(observers, "Flight ID " + flightId + " price updated to " + newPrice);
-                break;
+                String message = "Discount of " + discount + "% applied to Flight ID " + flightId + "; new price: $" + newPrice;
+                notifyObservers(observers, message);
+                notifications.add(message);  // Storing the notification
             }
-        }
+        });
     }
 
-    private static void registerObserver(List<FlightObserver> observers) {
-        // Assume Passenger is a type of observer
-        FlightObserver newObserver = new Passenger();  // You would typically choose or create a specific observer type
-        observers.add(newObserver);
-        System.out.println("New observer registered.");
+    private static void registerObserver(Scanner scanner) {
+        System.out.print("Enter name for new observer: ");
+        String name = scanner.next();
+        System.out.print("Is the observer an Employee or a Passenger? (E/P): ");
+        String type = scanner.next();
+        FlightObserver observer = type.equalsIgnoreCase("E") ? new Employee(name) : new Passenger(name);
+        observers.add(observer);
+        System.out.println("Observer registered: " + name);
     }
 
-    private static void viewNotifications(List<FlightObserver> observers) {
-        // This might simply trigger each observer to display their last received message or status
-        for (FlightObserver observer : observers) {
-            observer.update("Displaying current notification status");  // Update method would need to handle this appropriately
-        }
+    private static void removeObserver(Scanner scanner) {
+        System.out.print("Enter name of observer to remove: ");
+        String name = scanner.next();
+        observers.removeIf(o -> o.getName().equals(name));
+        System.out.println("Observer removed: " + name);
     }
 
+    private static void viewNotifications() {
+        System.out.println("Notifications:");
+        notifications.forEach(System.out::println);
+    }
+
+    private static FlightObserver loginOrCreateObserver(Scanner scanner) {
+        System.out.print("Enter your name: ");
+        String name = scanner.next();
+        System.out.print("Are you an Employee or a Passenger? (E/P): ");
+        String type = scanner.next();
+        FlightObserver observer = type.equalsIgnoreCase("E") ? new Employee(name) : new Passenger(name);
+        observers.add(observer);
+        return observer;
 
 
-
+    }
 }
