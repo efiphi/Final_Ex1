@@ -15,10 +15,10 @@ public class Main {
         List<Flight> flights = new ArrayList<>();
         List<FlightObserver> observers = new ArrayList<>();
         FlightObserver currentObserver = loginOrCreateObserver(scanner);
-        flights.add(new Flight("FL100", 300.00, 180, LocalDateTime.now(), LocalDateTime.now().plusHours(3), false));
-        flights.add(new Flight("FL200", 200.00, 150, LocalDateTime.now().plusHours(1), LocalDateTime.now().plusHours(4), false));
-        flights.add(new Flight("FL300", 400.00, 90, LocalDateTime.now().plusHours(4), LocalDateTime.now().plusHours(5), true));
-        flights.add(new Flight("FL400", 250.00, 120, LocalDateTime.now().plusHours(2), LocalDateTime.now().plusHours(5), true));
+        flights.add(new Flight("FL100", 300.00, 180, LocalDateTime.now(), LocalDateTime.now().plusHours(3), false,"ELAL"));
+        flights.add(new Flight("FL200", 200.00, 150, LocalDateTime.now().plusHours(1), LocalDateTime.now().plusHours(4), false,"ARKIA"));
+        flights.add(new Flight("FL300", 400.00, 90, LocalDateTime.now().plusHours(4), LocalDateTime.now().plusHours(5), true,"UNITED"));
+        flights.add(new Flight("FL400", 250.00, 120, LocalDateTime.now().plusHours(2), LocalDateTime.now().plusHours(5), true,"AMERICAN AIRLINES"));
         // Add more flights as needed
 
         int mainChoice;
@@ -223,7 +223,10 @@ public class Main {
         System.out.print("Is direct (true/false): ");
         boolean direct = scanner.nextBoolean();
 
-        Flight newFlight = new Flight(flightNumber, price, duration, takeoffTime, landingTime, direct);
+        System.out.print("Airline Name: ");
+        String airlineName = scanner.next();
+
+        Flight newFlight = new Flight(flightNumber, price, duration, takeoffTime, landingTime, direct, airlineName);
         flights.add(newFlight);
 
         String message = "New flight added: Flight Number " + flightNumber + ", Price: $" + price +

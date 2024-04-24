@@ -12,14 +12,17 @@ public class Flight extends AirlineComponent implements FlightSubject {
     private LocalDateTime takeoffTime;
     private LocalDateTime landingTime;
     private List<FlightObserver> observers = new ArrayList<>();
+    private String airlineName;
 
-    public Flight(String flightNumber, double price, int duration, LocalDateTime takeoffTime, LocalDateTime landingTime, boolean isDirect) {
+    public Flight(String flightNumber, double price, int duration, LocalDateTime takeoffTime, LocalDateTime landingTime, boolean isDirect, String airlineName) {
+        super(airlineName);
         this.flightNumber = flightNumber;
         this.price = price;
         this.duration = duration;
         this.takeoffTime = takeoffTime;
         this.landingTime = landingTime;
         this.isDirect = isDirect;
+        this.airlineName = airlineName;
     }
     // Getters
     public String getFlightNumber() {
@@ -40,6 +43,9 @@ public class Flight extends AirlineComponent implements FlightSubject {
 
     public LocalDateTime getLandingTime() {
         return landingTime;
+    }
+    public String getAirlineName() {
+        return airlineName;
     }
 
     // Setters
@@ -66,6 +72,9 @@ public class Flight extends AirlineComponent implements FlightSubject {
         return this.isDirect;
 
     }
+    public void setAirlineName(String airlineName) {
+        this.airlineName = airlineName;
+    }
     @Override
     public String toString() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -73,7 +82,8 @@ public class Flight extends AirlineComponent implements FlightSubject {
                 ", Price: $" + String.format("%.2f", price) +
                 ", Duration: " + duration + " minutes" +
                 ", Takeoff Time: " + takeoffTime.format(formatter) +
-                ", Landing Time: " + landingTime.format(formatter);
+                ", Landing Time: " + landingTime.format(formatter) +
+                ", Airline Name: " + airlineName;
     }
 
     @Override
